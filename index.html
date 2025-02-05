@@ -17,6 +17,35 @@
       body {
         font-family: "Be Vietnam Pro", sans-serif;
       }
+      /* Custom keyframes for fadeIn and slideUp animation */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      /* Animate fade in with slide up */
+      .animate-fadeInUp {
+        animation: fadeInUp 0.5s ease-in-out forwards;
+      }
+      /* Modal animation */
+      @keyframes modalIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .animate-modalIn {
+        animation: modalIn 0.3s ease-out forwards;
+      }
     </style>
   </head>
   <body class="bg-gray-100 flex flex-col min-h-screen">
@@ -41,7 +70,7 @@
         <div class="hidden md:block">
           <button
             id="aboutBtn"
-            class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition"
+            class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transform hover:scale-105 transition duration-300"
           >
             About Exchango
           </button>
@@ -67,7 +96,7 @@
             Convert currencies in real-time using the latest exchange rates.
           </p>
           <!-- Converter Card -->
-          <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+          <div id="converterCard" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg opacity-0">
             <div class="mb-4">
               <label for="amount" class="block text-gray-700 font-medium mb-2">
                 Amount
@@ -129,10 +158,10 @@
       id="aboutModal"
       class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"
     >
-      <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+      <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative opacity-0">
         <button
           id="closeModal"
-          class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold"
         >
           &times;
         </button>
@@ -148,6 +177,14 @@
 
     <!-- CURRENCY CONVERTER SCRIPT -->
     <script>
+      // Animate the converter card on page load
+      window.addEventListener("load", () => {
+        const converterCard = document.getElementById("converterCard");
+        converterCard.classList.add("animate-fadeInUp");
+        // Remove opacity-0 after animation starts so it remains visible
+        converterCard.classList.remove("opacity-0");
+      });
+
       // API endpoint that returns currency exchange rates
       const apiURL = 'https://open.er-api.com/v6/latest';
       let rates = {};
@@ -213,9 +250,13 @@
         const amountInBase = amount / rates[fromCurrency];
         const convertedAmount = amountInBase * rates[toCurrency];
 
-        // Display the result
-        document.getElementById("result").textContent =
-          `${amount} ${fromCurrency} = ${convertedAmount.toFixed(4)} ${toCurrency}`;
+        const resultEl = document.getElementById("result");
+        // Reset animation by removing and re-adding the class
+        resultEl.classList.remove("animate-fadeInUp");
+        // Trigger reflow to restart animation
+        void resultEl.offsetWidth;
+        resultEl.textContent = `${amount} ${fromCurrency} = ${convertedAmount.toFixed(4)} ${toCurrency}`;
+        resultEl.classList.add("animate-fadeInUp");
       });
 
       // Modal functionality
@@ -226,17 +267,25 @@
       // Show modal when About Exchango button is clicked
       aboutBtn.addEventListener("click", () => {
         aboutModal.classList.remove("hidden");
+        // Animate modal appearance
+        const modalContent = aboutModal.firstElementChild;
+        modalContent.classList.add("animate-modalIn");
+        modalContent.classList.remove("opacity-0");
       });
 
       // Hide modal when close button is clicked
       closeModal.addEventListener("click", () => {
         aboutModal.classList.add("hidden");
+        const modalContent = aboutModal.firstElementChild;
+        modalContent.classList.remove("animate-modalIn");
       });
 
       // Hide modal when clicking outside the modal content
       window.addEventListener("click", (e) => {
         if (e.target === aboutModal) {
           aboutModal.classList.add("hidden");
+          const modalContent = aboutModal.firstElementChild;
+          modalContent.classList.remove("animate-modalIn");
         }
       });
     </script>
